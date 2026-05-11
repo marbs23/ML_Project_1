@@ -2,7 +2,6 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 import os
-import math
 
 # DATA
 def load_csv(ruta):
@@ -145,3 +144,5 @@ if __name__ == "__main__":
     x_norm = np.concatenate([[1], x_norm]).reshape(1, -1)
     y_new = x_norm @ W_grad_desc
     print(f"\nY predict from new value:\n{y_new}")
+
+    # TODO: GRAPHICS
