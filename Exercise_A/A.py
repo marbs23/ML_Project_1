@@ -138,3 +138,10 @@ if __name__ == "__main__":
 
     # History (MSE)
     print_hist(history)
+
+    # New prediction
+    x_new = np.array([120, 3, 10, 7], dtype=float)
+    x_norm = (x_new - means) / sds
+    x_norm = np.concatenate([[1], x_norm]).reshape(1, -1)
+    y_new = x_norm @ W_grad_desc
+    print(f"\nY predict from new value:\n{y_new}")
