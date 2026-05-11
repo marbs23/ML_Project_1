@@ -44,7 +44,6 @@ def gradiente_bce(X, y, W):
 def gradient_descent(X, y, lr=0.01, epochs=1000):
     W = np.zeros((X.shape[1], 1))
 
-    SSm = np.sum((y - np.mean(y))**2)
     history = []
 
     for i in range(epochs):
