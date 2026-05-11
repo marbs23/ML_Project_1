@@ -2,3 +2,4 @@
 
 To do:
 - Complete graphics in Part1 A
+- Complete graphics in Part2 A
