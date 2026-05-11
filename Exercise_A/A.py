@@ -1,11 +1,11 @@
-import random
+import numpy as np
 import csv
 import matplotlib.pyplot as plt
 import os
 import math
 
 # DATA
-def cargar_csv(ruta):
+def load_csv(ruta):
     data = []
     with open(ruta) as f:
         reader = csv.DictReader(f)
@@ -15,137 +15,126 @@ def cargar_csv(ruta):
             data.append(row_to)
     return data, headers
 
-def predecir(X, w, b):
-    result = []
-    for row in X:
-        sum_row = 0
-        for j in range(len(w)):
-            sum_row += row[j] * w[j] 
-        result.append(sum_row + b)
-    return result
+# Normalizacion Z-Score
+def z_score_normalization(X):
+    means = np.mean(X, axis=0)
+    sds = np.std(X, axis=0)
+    sds_new = np.where(sds == 0, 1, sds)
+    X_normal = (X - means) / sds_new
+    return X_normal, means, sds
 
-def calcular_mse(data, W, b):
-    y = [row[-1] for row in data]
-    y_pred = predecir(data, W, b)
-    return sum((r-p)**2 for r, p in zip(y,y_pred))/len(data)
+def predecir(X, W):
+    return X @ W
 
-def calcular_mae(data, W, b):
-    y = [row[-1] for row in data]
-    y_pred = predecir(data, W, b)
-    return sum(abs(r-p) for r, p in zip(y, y_pred))/len(data)
+def calcular_mse(X, y, W):
+    y_pred = predecir(X, W)
+    mse = np.mean((y - y_pred)**2)
+    return mse
 
-def gradiente_mse(data, w, b):
-    n = len(data)
-    grad_w = [0.0] * len(w)
-    grad_b = 0.0
-    y_pred = predecir(data, w, b)
-    for i in range(n):
-        error = data[i][-1] - y_pred[i]
-        for j in range(len(w)):
-            grad_w[j] += -2 * data[i][j] * error 
-        grad_b += -2 * error
-    grad_res_w = [gw/n for gw in grad_w]
-    return grad_res_w, grad_b / n
-
-def gradiente_una_muestra(x, y, w, b):
-    y_pred = sum(x_i * w_i for x_i,w_i in zip(x, w))+b
+def gradiente_mse(X, y, W):
+    N = len(y)
+    y_pred = predecir(X, W)
     error = y - y_pred
-    grad_w = [-2 * xj * (error) for xj in x]
-    grad_b = -2 * error
-    return grad_w, grad_b
-
-def solucion_analitica(data):
-    n = len(data)
-    sx  = sum(x for x, y in data)
-    sy  = sum(y for x, y in data)
-    sxy = sum(x*y for x, y in data)
-    sx2 = sum(x**2 for x, y in data)
-
-    m = (n * sxy - sx * sy) / (n * sx2 - sx**2)
-    b = (sy - m * sx) / n
-    return m, b
+    grad_W = (-2 / N) * (X.T @ error)
+    return grad_W
 
 # GRADIENT DESCENT (GD)
-def gradient_descent(data, lr=0.01, iteraciones=1000, w_init = None, b_init=0.0):
-    w = list(w_init) if w_init else [0.0] * (len(data[0]) - 1)
-    b = b_init
-    historial = []
-    for i in range(iteraciones):
-        mse = calcular_mse(data, w, b)
-        historial.append((i, w[:], b, mse))
-        grad_w, grad_b = gradiente_mse(data, w, b)
-        for j in range(len(grad_w)):
-            w[j] = w[j] - lr * grad_w[j]
-        b = b - lr * grad_b
-    return w, b, historial
+def gradient_descent(X, y, lr=0.01, epochs=1000):
+    W = np.zeros((X.shape[1], 1))
 
-def calcular_estadisticas(data):
-    n = len(data)
-    num_columnas = len(data[0])
-    medias = []
-    desviaciones = []
-    
-    for j in range(num_columnas - 1):
-        columna = [row[j] for row in data]
-        media = sum(columna) / n
-        
-        varianza = sum((x - media)**2 for x in columna) / n
-        desviacion = math.sqrt(varianza)
-        
-        medias.append(media)
-        desviaciones.append(desviacion)
-        
-    return medias, desviaciones
+    SSm = np.sum((y - np.mean(y))**2)
+    history = []
 
-# Normalizacion Z-Score
-def normalizar_z_score(data, medias, desviaciones):
-    data_normalizada = []
-    for row in data:
-        nueva_fila = []
-        for j in range(len(row) - 1):
-            if desviaciones[j] > 0:
-                z = (row[j] - medias[j]) / desviaciones[j]
-            else:
-                z = 0.0
-            nueva_fila.append(z)
-        
-        nueva_fila.append(row[-1])
-        data_normalizada.append(nueva_fila)
-        
-    return data_normalizada
+    for i in range(epochs):
+        mse = calcular_mse(X, y, W)
+        if (i > 0 and abs(mse-history[-1][2])< 1e-6):
+            history.append((i, W.copy(), mse))
+            break
+        history.append((i, W.copy(), mse))
+        grad_W = gradiente_mse(X, y, W)
+        W = W - lr * grad_W
 
-def graficar(hist, case, mode):
+    SSr = mse * len(y)
+    R2 = 1 - SSr/SSm
+    return W.copy(), history, R2
+
+def normal_ecuation(X, y):    
+    W_analitico = np.linalg.inv(X.T @ X) @ (X.T @ y)    
+    return W_analitico
+
+def graficar(data, W, W_normal,  label_x, label_y, case, mode):
     dirname = f"outputs/{case}"
     if not os.path.exists(dirname):
         os.makedirs(dirname)
-    mse_data = [d[3] for d in hist]
-    plt.figure(figsize=(10, 6))
-    plt.plot(mse_data, color='red', linewidth=1, label=f"MSE {mode} data")
-    plt.title("Convergence Graph "+ mode)
-    plt.xlabel("Iterations")
-    plt.ylabel("Error MSE")
+    x_vals = [d[0] for d in data]
+    y_vals = [d[1] for d in data]
+    plt.figure(figsize=(10, 5))
+    plt.scatter(x_vals, y_vals, color='blue', label='Data')
+
+    x_line = np.linspace(min(x_vals), max(x_vals), 300)
+    z_line = np.log(x_line)
+
+    y_line_gd = W[0][0] + W[1][0] * z_line
+    plt.plot(x_line, y_line_gd, color='red', linewidth=3, 
+             label=f'GD: y={W[1][0]:.2f}x + {W[0][0]:.2f}')
+    
+    y_line_norm = W_normal[0][0] + W_normal[1][0] * z_line
+    plt.plot(x_line, y_line_norm, color='green', linestyle='--', linewidth=2,
+             label=f'Normal Ec.: y={W_normal[1][0]:.2f}x + {W_normal[0][0]:.2f}')
+    
+    plt.xscale('log')
+    plt.title(f'Modelo Logarítmico {mode} — {case}')
+    plt.xlabel(label_x)
+    plt.ylabel(label_y)
     plt.legend()
     plt.grid(True)
-    plt.savefig(f"{dirname}/{case}_convergence_{mode}.png")
-    print(f"Save: Convergence graph with {mode}.png")
+    plt.savefig(f"{dirname}/{label_x}_{mode}.png")
+    print(f"Save: {label_x} with {mode}.png")
     plt.close()
+
+def print_hist(hist):
+    print()
+    for i in range(0, len(hist), 20):
+        epoch, pesos, mse = hist[i]
+        pesos_str = " | ".join([f"w{j}: {pesos[j][0]:.4f}" for j in range(len(pesos))])
+        print(f"Iter {epoch:4d} | MSE: {mse:.8f} | {pesos_str}")
+    
+    if len(hist) % 20 != 1:
+        epoch, pesos, mse = hist[-1]
+        pesos_str = " | ".join([f"w{j}: {pesos[j][0]:.4f}" for j in range(len(pesos))])
+        print(f"Iter {epoch:4d} | MSE: {mse:.8f} | {pesos_str} (Final)")
 
 # MAIN
 if __name__ == "__main__":
+    # Preprocessing
+    data, headers = load_csv('dataset.csv')
+    data_array = np.array(data)
+    # Normalization Z-score
+    data_normal = z_score_normalization(data_array[:,:-1])
 
-    print("LINEAR REGRESSION WITH GRADIENT DESCENT (MULTIVARIABLE)")
-    filename = "caso3_energia.csv"
-    data_raw, headers = cargar_csv(filename)
+    # X without normalization
+    X = (np.hstack((np.ones((len(data),1)),data_array[:,:-1])))
+    print(f"X (no normalization):\n{X}")
 
-    medias, desviaciones = calcular_estadisticas(data_raw)
-    
-    data = normalizar_z_score(data_raw, medias, desviaciones)
+    # X with normalization Z-score
+    X_normal = (np.hstack((np.ones((len(data),1)),data_normal)))
+    print(f"\nX (normalization z-score):\n{X_normal}")
 
-    # GD weights, bias and historial
-    w_GD, b_GD, hist_GD = gradient_descent(data, lr=0.05, iteraciones=2000)
-    print("Final weights with GD:")
-    [print(f"{wi} ") for wi in w_GD]
-    print(f"Bias: {b_GD}")
-    # Graphs about convergence
-    #graficar(hist_GD, filename, "GD")
-    #graficar(hist_SGD, filename, "SGD")
+    # Y
+    y = data_array[:, -1].reshape(-1, 1)
+    print(f"\nY:\n{y}")
+
+    # Normal Ecuation (Vector W)
+    W_normal_ecuation = normal_ecuation(X, y)
+    print(f"\nW (normal ecuation):\n{W_normal_ecuation}")
+
+    # Normal Ecuation with normal data
+    W_normal_ecuation = normal_ecuation(X_normal, y)
+    print(f"\nW (normal ecuation with data z-score):\n{W_normal_ecuation}")
+
+    # Gradient Descent (Vector W)
+    W_grad_desc, history, R2 = gradient_descent(X_normal, y, 0.1, 5000)
+    print(f"\nW (gradient descent):\n{W_grad_desc}")
+
+    # History (MSE)
+    print_hist(history)
