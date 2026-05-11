@@ -46,7 +46,7 @@ def gradient_descent(X, y, lr=0.01, epochs=1000):
 
     for i in range(epochs):
         mse = calcular_mse(X, y, W)
-        if (i > 0 and abs(mse-history[-1][2])< 1e-6):
+        if (i > 0 and abs(mse-history[-1][2])< 1e-10):
             history.append((i, W.copy(), mse))
             break
         history.append((i, W.copy(), mse))
