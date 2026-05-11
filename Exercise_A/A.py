@@ -110,7 +110,7 @@ if __name__ == "__main__":
     data, headers = load_csv('dataset.csv')
     data_array = np.array(data)
     # Normalization Z-score
-    data_normal = z_score_normalization(data_array[:,:-1])
+    data_normal, means, sds = z_score_normalization(data_array[:,:-1])
 
     # X without normalization
     X = (np.hstack((np.ones((len(data),1)),data_array[:,:-1])))
