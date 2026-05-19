@@ -61,7 +61,7 @@ ax.set_title('Sensor Variance — Red bars are candidates for removal')
 ax.legend()
 plt.xticks(rotation=45)
 plt.tight_layout()
-plt.savefig(f"outputs/variance.png")
+plt.savefig(f"outputs/variance.png",  dpi=300, bbox_inches='tight')
 plt.close()
 
 # Drop sensors with variance below threshold
@@ -250,7 +250,7 @@ result_lr_sel = train_and_evaluate(
     y_tr       = df_train['label'],
     X_v        = df_v_deconf[features_B],
     y_v        = df_val['label'],
-    model_name = 'LR — Features seleccionadas (con deconfounding)'
+    model_name = 'LR — Survive Features (with deconfounding)'
 )
 
 # Confussion matrices Visualization
@@ -289,7 +289,7 @@ for ax, result in zip(axes, results):
 
 plt.suptitle('Comparación de Modelos — Validation Set', fontsize=13, y=1.02)
 plt.tight_layout()
-plt.savefig(f"outputs/confussion-matrices.png")
+plt.savefig(f"outputs/confussion-matrices.png", dpi=300, bbox_inches='tight')
 plt.close()
 
 # Precision-Recall Visualization
@@ -327,7 +327,7 @@ ax.grid(True, alpha=0.3)
 ax.set_xlim([0, 1])
 ax.set_ylim([0, 1])
 plt.tight_layout()
-plt.savefig(f"outputs/precision-recall.png")
+plt.savefig(f"outputs/precision-recall.png", dpi=300, bbox_inches='tight')
 plt.close()
 
 
