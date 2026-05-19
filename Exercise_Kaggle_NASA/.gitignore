@@ -9,7 +9,11 @@ data/processed/*
 !data/processed/.gitkeep
 
 artifacts/*
-!artifacts/.gitkeep
 reports/generated/*
-!reports/generated/.gitkeep
 
+notebook.py
+scripts/predict.py
+scripts/train.py
+src/nasa_fd002/evaluation.py
+src/nasa_fd002/modeling.py
+src/nasa_fd002/pipeline.py
