@@ -46,7 +46,7 @@ def gradient_descent(X, y, lr=0.01, epochs=1000):
 
     for i in range(epochs):
         mse = calcular_mse(X, y, W)
-        if (i > 0 and abs(mse-history[-1][2])< 1e-10):
+        if (i > 0 and abs(mse-history[-1][2])< 1e-1000):
             history.append((i, W.copy(), mse))
             break
         history.append((i, W.copy(), mse))
@@ -93,12 +93,12 @@ def graficar(data, W, W_normal,  label_x, label_y, case, mode):
 
 def print_hist(hist):
     print()
-    for i in range(0, len(hist), 20):
+    for i in range(0, len(hist), 500):
         epoch, pesos, mse = hist[i]
         pesos_str = " | ".join([f"w{j}: {pesos[j][0]:.4f}" for j in range(len(pesos))])
         print(f"Iter {epoch:4d} | MSE: {mse:.8f} | {pesos_str}")
     
-    if len(hist) % 20 != 1:
+    if len(hist) % 500 != 1:
         epoch, pesos, mse = hist[-1]
         pesos_str = " | ".join([f"w{j}: {pesos[j][0]:.4f}" for j in range(len(pesos))])
         print(f"Iter {epoch:4d} | MSE: {mse:.8f} | {pesos_str} (Final)")
