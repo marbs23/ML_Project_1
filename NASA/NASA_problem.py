@@ -2,7 +2,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+import os
 
+
+os.makedirs("outputs", exist_ok=True)
 # Load data
 col_names = (
     ['engine_id', 'cycle'] +
@@ -58,7 +61,8 @@ ax.set_title('Sensor Variance — Red bars are candidates for removal')
 ax.legend()
 plt.xticks(rotation=45)
 plt.tight_layout()
-plt.show()
+plt.savefig(f"outputs/variance.png")
+plt.close()
 
 # Drop sensors with variance below threshold
 VARIANCE_THRESHOLD = 0.1
@@ -285,7 +289,8 @@ for ax, result in zip(axes, results):
 
 plt.suptitle('Comparación de Modelos — Validation Set', fontsize=13, y=1.02)
 plt.tight_layout()
-plt.show()
+plt.savefig(f"outputs/confussion-matrices.png")
+plt.close()
 
 # Precision-Recall Visualization
 fig, ax = plt.subplots(figsize=(9, 6))
@@ -322,7 +327,8 @@ ax.grid(True, alpha=0.3)
 ax.set_xlim([0, 1])
 ax.set_ylim([0, 1])
 plt.tight_layout()
-plt.show()
+plt.savefig(f"outputs/precision-recall.png")
+plt.close()
 
 
 # SUMMARY FINAL TABLE
