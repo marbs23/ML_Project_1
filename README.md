@@ -4,6 +4,8 @@
 
 > Proyecto 1 — CS3061 Machine Learning · UTEC 2025  
 > Autor: Martin Jesús Bonilla Sarmiento
+> Autor: Cartagena Miranda, Lucia Jimena
+> Autor: Watson Guevara, Natalia
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)](https://www.python.org/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.4+-orange?logo=scikit-learn)](https://scikit-learn.org/)
@@ -261,8 +263,10 @@ Contiene: ingeniería de datos, metodología, resultados, análisis de costo-ben
 
 ---
 
-## ✍️ Autor
+## ✍️ Autores
 
 **Martin Jesús Bonilla Sarmiento**  
+**Cartagena Miranda, Lucia Jimena**
+**Watson Guevara, Natalia**
 Facultad de Ingeniería — Universidad de Ingeniería y Tecnología (UTEC)  
 Lima, Perú · 2025
