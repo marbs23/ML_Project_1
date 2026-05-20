@@ -257,7 +257,7 @@ engine_id | cycle | op_setting_1 | op_setting_2 | op_setting_3 | sensor_1 ... se
 
 ## 📄 Informe
 
-El informe completo en formato IEEEtran está disponible en [`report/ML_Proj_1.pdf`](report/ML_Proj_1.pdf).
+El informe completo en formato IEEEtran está disponible en [`ML_Proj_1.pdf`](NASA/ML_Proj_1.pdf).
 
 Contiene: ingeniería de datos, metodología, resultados, análisis de costo-beneficio, bias-variance tradeoff y evidencia de submission en Kaggle (F1 público = **0.90**).
 
