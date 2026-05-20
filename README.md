@@ -217,7 +217,7 @@ git clone https://github.com/marbs23/ML_Project_1
 cd ML_Project_1/NASA
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install pandas numpy scikit-learn matplotlib seaborn
+pip install -r requirements.txt
 ```
 
 ### Ejecutar el pipeline completo
