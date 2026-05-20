@@ -50,18 +50,35 @@ print("Sensor variance (sorted from lowest to highest):")
 print(sensor_variance.round(6))
 
 # Visualization about Variance
-fig, ax = plt.subplots(figsize=(12, 5))
+fig, ax = plt.subplots(figsize=(13, 5))
+
 colors = ['tomato' if v < 0.1 else 'steelblue' for v in sensor_variance.values]
-bars = ax.bar(sensor_variance.index, sensor_variance.values, color=colors)
-ax.axhline(y=0.1, color='red', linestyle='--', linewidth=1.5, 
-           label='Variance threshold = 0.1')
-ax.set_xlabel('Sensor')
-ax.set_ylabel('Variance')
-ax.set_title('Sensor Variance — Red bars are candidates for removal')
-ax.legend()
-plt.xticks(rotation=45)
+bars = ax.bar(sensor_variance.index, sensor_variance.values, color=colors, 
+              edgecolor='white', linewidth=0.5)
+
+ax.set_yscale('log')
+ax.axhline(y=0.1, color='red', linestyle='--', linewidth=1.5,
+           label='Umbral de varianza = 0.1')
+
+for bar, label, val in zip(bars, sensor_variance.index, sensor_variance.values):
+    if val < 0.1:
+        ax.text(bar.get_x() + bar.get_width() / 2, val * 2.5,
+                f'{val:.2e}', ha='center', va='bottom',
+                fontsize=7.5, color='tomato', fontweight='bold', rotation=0)
+
+ax.set_xlabel('Sensor', fontsize=11)
+ax.set_ylabel('Varianza (escala logarítmica)', fontsize=11)
+ax.set_title('Varianza de Sensores — Escala Logarítmica\n'
+             'Barras rojas: varianza $< 0.1$ (candidatos a eliminación)',
+             fontsize=12)
+
+ax.legend(fontsize=10)
+ax.grid(True, which='both', axis='y', linestyle=':', alpha=0.4)
+ax.grid(False, axis='x')
+
+plt.xticks(rotation=45, ha='right', fontsize=9)
 plt.tight_layout()
-plt.savefig(f"outputs/variance.png",  dpi=300, bbox_inches='tight')
+plt.savefig("outputs/variance.png", dpi=300, bbox_inches='tight')
 plt.close()
 
 # Drop sensors with variance below threshold
@@ -108,7 +125,7 @@ label_corr_deconf = (
 print("\nCorrelation with Critical label AFTER deconfounding:")
 print(label_corr_deconf.round(4))
 
-LOW_CORR_THRESHOLD = 0.05
+LOW_CORR_THRESHOLD = 0.03
 low_corr_sensors = label_corr_deconf[
     (label_corr_deconf < LOW_CORR_THRESHOLD) | (label_corr_deconf.isna())
 ].index.tolist()
@@ -222,23 +239,12 @@ result_rf_sel = train_and_evaluate(
     model_name = 'RF — Survive features (with deconfounding)'
 )
 
-# ── Modelo 3: Logistic Regression con features SELECCIONADAS ─────────────────
-# LR asume que la frontera de decisión es lineal en el espacio de features
-# Necesita escalado porque es sensible a la magnitud de los valores
-# Pipeline garantiza que el scaler se fitea solo en train (no hay leakage)
-
+# Model 3: Logistic Regression with survive features
 lr_selected = Pipeline([
     ('scaler', StandardScaler()),
-    # StandardScaler: x_scaled = (x - mean) / std
-    # Necesario para LR porque los sensores tienen escalas muy diferentes
-    # sensor_9 puede tener valores en miles, sensor_15 en unidades
-    # Sin escalar, el gradiente estaría dominado por los sensores grandes
-    
     ('clf', LogisticRegression(
         class_weight='balanced',
-        C=1.0,         # C = 1/λ donde λ es la fuerza de regularización L2
-                       # C grande = menos regularización (más flexible)
-                       # C pequeño = más regularización (más conservador)
+        C=1.0,
         max_iter=1000,
         random_state=42
     ))
@@ -342,7 +348,7 @@ print("-"*70)
 for result in results:
     f1 = f1_score(y_v, result['preds'])
     n_features = (
-        len(features_A) if 'Todas' in result['name'] 
+        len(features_A) if 'All' in result['name'] 
         else len(features_B)
     )
     print(f"{result['name']:<45} {f1:>6.4f} {result['threshold']:>10.3f} {n_features:>8}")
@@ -357,7 +363,7 @@ print(f"  Threshold = {best_result['threshold']:.3f}")
 
 
 
-#dasfdsafdas
+# SUBMISSION
 
 test_df = pd.read_csv('test_FD002.txt', sep=r'\s+', header=None, names=col_names)
 
