@@ -138,8 +138,10 @@ if __name__ == "__main__":
     print(f"\nW (gradient descent):\n{W_grad_desc}")
 
     # Accuracy
-    acc, _, _, _, _ = calculate_accuracy(X_normal, y_bin, W_grad_desc)
+    acc, TP, TN, FP, FN = calculate_accuracy(X_normal, y_bin, W_grad_desc)
     print(f"Accuracy of model: {acc}")
+    print(f"Confusion matrix:\n{np.array([[TN, FP], [FN, TP]])}")
+
 
     # History (MSE)
     print_hist(history)
